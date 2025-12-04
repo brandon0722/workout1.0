@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Workout Checklist</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <style>
   body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
   h1 { text-align: center; }
@@ -32,22 +35,14 @@
   const STORAGE_PREFIX = 'workout-check-';
   const workoutsDiv = document.getElementById('workouts');
 
-  // Helper to read saved state
   function loadChecked(key) {
-    try {
-      return localStorage.getItem(STORAGE_PREFIX + key) === 'true';
-    } catch (e) {
-      return false;
-    }
+    try { return localStorage.getItem(STORAGE_PREFIX + key) === 'true'; }
+    catch (e) { return false; }
   }
 
-  // Helper to save checked state
   function saveChecked(key, value) {
-    try {
-      localStorage.setItem(STORAGE_PREFIX + key, value ? 'true' : 'false');
-    } catch (e) {
-      // ignore storage errors (e.g., in private mode)
-    }
+    try { localStorage.setItem(STORAGE_PREFIX + key, value ? 'true' : 'false'); }
+    catch (e) { /* ignore */ }
   }
 
   workoutData.forEach((day, dayIndex) => {
@@ -60,18 +55,13 @@
     const ul = document.createElement('ul');
     day.exercises.forEach((ex, exIndex) => {
       const li = document.createElement('li');
-
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-
-      // Unique key for this checkbox so state persists across app restarts
       const key = `${dayIndex}-${exIndex}`;
       checkbox.dataset.key = key;
-
       const span = document.createElement('span');
       span.textContent = ex;
 
-      // Initialize from storage
       if (loadChecked(key)) {
         checkbox.checked = true;
         span.classList.add('completed');
@@ -91,6 +81,15 @@
     dayDiv.appendChild(ul);
     workoutsDiv.appendChild(dayDiv);
   });
+
+  // Register service worker for offline caching (if supported)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => {
+        console.log('Service Worker registration failed:', err);
+      });
+    });
+  }
   </script>
 </body>
 </html>
