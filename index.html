@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Workout Checklist</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+  h1 { text-align: center; }
+  .day { background: #fff; margin-bottom: 20px; padding: 15px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  h2 { margin-top: 0; }
+  ul { list-style: none; padding: 0; }
+  li { display: flex; align-items: center; margin-bottom: 10px; }
+  input[type=checkbox] { margin-right: 10px; width: 20px; height: 20px; }
+  .completed { text-decoration: line-through; color: gray; }
+</style>
+</head>
+<body>
+  <h1>Workout Checklist</h1>
+  <div id="workouts"></div>
+
+  <script>
+  // Workout data (your original content)
+  const workoutData = [
+    { day: "Monday", exercises: ["Dumbbell Bench Press", "Incline Dumbbell Press", "Chest Flyes", "Tricep Dips", "30 min Cardio"] },
+    { day: "Tuesday", exercises: ["Barbell Squats", "Walking Lunges", "Leg Press", "Romanian Deadlifts", "30 min Cardio"] },
+    { day: "Wednesday", exercises: ["Lateral Raises", "Shoulder Press", "Lat Pulldown", "Single-Arm Row", "30 min Cardio"] },
+    { day: "Thursday", exercises: ["Hip Thrusts", "Reverse Lunges", "Kickbacks", "Lateral Step-Ups", "Shoulder Press", "Lateral Raises", "Rear Delt Fly", "Core Work", "30 min Cardio (optional)"] },
+    { day: "Friday", exercises: ["Incline Dumbbell Press", "Push-Ups", "Chest Flys", "Lat Pulldown", "Cable Rows", "Dumbbell Curls", "Tricep Rope Pushdowns", "30 min Cardio (optional)"] }
+  ];
+
+  const STORAGE_PREFIX = 'workout-check-';
+  const workoutsDiv = document.getElementById('workouts');
+
+  // Helper to read saved state
+  function loadChecked(key) {
+    try {
+      return localStorage.getItem(STORAGE_PREFIX + key) === 'true';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Helper to save checked state
+  function saveChecked(key, value) {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + key, value ? 'true' : 'false');
+    } catch (e) {
+      // ignore storage errors (e.g., in private mode)
+    }
+  }
+
+  workoutData.forEach((day, dayIndex) => {
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day';
+    const dayTitle = document.createElement('h2');
+    dayTitle.textContent = day.day;
+    dayDiv.appendChild(dayTitle);
+
+    const ul = document.createElement('ul');
+    day.exercises.forEach((ex, exIndex) => {
+      const li = document.createElement('li');
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+
+      // Unique key for this checkbox so state persists across app restarts
+      const key = `${dayIndex}-${exIndex}`;
+      checkbox.dataset.key = key;
+
+      const span = document.createElement('span');
+      span.textContent = ex;
+
+      // Initialize from storage
+      if (loadChecked(key)) {
+        checkbox.checked = true;
+        span.classList.add('completed');
+      }
+
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) span.classList.add('completed');
+        else span.classList.remove('completed');
+        saveChecked(key, checkbox.checked);
+      });
+
+      li.appendChild(checkbox);
+      li.appendChild(span);
+      ul.appendChild(li);
+    });
+
+    dayDiv.appendChild(ul);
+    workoutsDiv.appendChild(dayDiv);
+  });
+  </script>
+</body>
+</html>
